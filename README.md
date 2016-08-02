@@ -1,18 +1,38 @@
 Repo Info
 =========
-This repo will be used as a collection of [Docker] [ELK Stack] related things. This will be an ongoing effort in regards to the info included.
+This repo will be used as a collection of [Docker] [ELK Stack] related things.
+This will be an ongoing effort in regards to the info included.
 
 Usage
 -----
-In order to use the included `docker-compose.yml` you will need to follow the included info within the following folders first.
+In order to use the included `docker-compose.yml` you will need to follow the
+included info within the following folders first.
+
+`Elasticsearch/README.md`
 
 `HAProxy/README.md`
 
 `Logstash/README.md`
 
+Or.... I have made it simpler for consuming this and building the [Docker] images.
+```
+docker-compose build
+```
+Now the required [Docker] images should be present locally. To validate you
+can do the following:
+```
+docker images
+```
+```
+elk-haproxy                  latest              c84e6e36f33b        5 seconds ago       330 MB
+elk-logstash                 latest              841af9fbd26a        15 seconds ago      561.9 MB
+elk-elasticsearch            latest              45bd7c40fe9a        3 hours ago         492.8 MB
+```
+
 Compose
 -------
-To spin up the environment using `docker-compose` we can that by executing the following:
+To spin up the environment using `docker-compose` we can that by executing the
+following:
 ```
 docker-compose up -d
 ```
