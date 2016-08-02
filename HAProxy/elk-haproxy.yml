@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  become: true
+  vars:
+  roles:
+  tasks:
+    - name: Configuring Rsyslog To Listen On UDP/10514
+      lineinfile:
+        dest: "/etc/rsyslog.conf"
+        line: "{{ item }}"
+      with_items:
+        - '$ModLoad imudp'
+        - '$UDPServerRun 10514'
+        # - '$ModLoad imtcp'
+        # - '$InputTCPServerRun 514'
+    - name: Configuring Rsyslog Redirect For UDP/10514
+      lineinfile:
+        dest: "/etc/rsyslog.d/50-default.conf"
+        line: "*.* @@127.0.0.1:10514"

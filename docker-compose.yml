@@ -1,0 +1,48 @@
+version: '2'
+services:
+  haproxy:
+    depends_on:
+      - elasticsearch
+      - kibana
+      - logstash
+    image: elk-haproxy:latest
+    # links:
+    #   - kibana
+    ports:
+      - "5044:5044"
+      - "5601:5601"
+      - "9090:9090"
+      - "9200:9200"
+      - "10514:10514"
+      - "10514:10514/udp"
+    restart: always
+
+  elasticsearch:
+    image: mrlesmithjr/elasticsearch:latest
+    command: "elasticsearch -Des.discovery.zen.ping.unicast.hosts=elasticsearch_master"
+    links:
+      - elasticsearch_master
+    volumes:
+      - "./.data:/usr/share/elasticsearch/data"
+    restart: always
+
+  elasticsearch_master:
+    image: mrlesmithjr/elasticsearch:latest
+    command: "elasticsearch -Des.node.master=true -Des.node.data=false"
+    restart: always
+
+  kibana:
+    depends_on:
+      - elasticsearch
+    image: mrlesmithjr/kibana:latest
+    links:
+      - elasticsearch
+    restart: always
+
+  logstash:
+    depends_on:
+      - elasticsearch
+    image: elk-logstash:latest
+    links:
+      - elasticsearch
+    restart: always
