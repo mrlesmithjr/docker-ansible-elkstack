@@ -18,7 +18,7 @@ services:
     restart: always
 
   elasticsearch:
-    image: mrlesmithjr/elasticsearch:latest
+    image: elk-elasticsearch:latest
     command: "elasticsearch -Des.discovery.zen.ping.unicast.hosts=elasticsearch_master"
     links:
       - elasticsearch_master
@@ -27,7 +27,7 @@ services:
     restart: always
 
   elasticsearch_master:
-    image: mrlesmithjr/elasticsearch:latest
+    image: elk-elasticsearch:latest
     command: "elasticsearch -Des.node.master=true -Des.node.data=false"
     restart: always
 
