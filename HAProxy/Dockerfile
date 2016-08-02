@@ -1,7 +1,7 @@
 FROM mrlesmithjr/haproxy:latest
 
 # Copy configuration
-COPY config/haproxy.cfg /etc/haproxy/haproxy.cfg
+COPY config/haproxy.cfg /haproxy.cfg
 
 # Copy Ansible playbook to do configurations
 COPY elk-haproxy.yml /

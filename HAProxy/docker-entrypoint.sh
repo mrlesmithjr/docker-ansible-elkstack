@@ -4,6 +4,11 @@ set -e
 # Start Rsyslogd
 rsyslogd
 
+# Check for existing haproxy.cfg
+if [ ! -f /etc/haproxy/haproxy.cfg ]; then
+	cp /haproxy.cfg /etc/haproxy/haproxy.cfg
+fi
+
 # first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then
 	set -- haproxy "$@"

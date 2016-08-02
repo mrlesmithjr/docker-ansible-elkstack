@@ -19,6 +19,8 @@ services:
       - "9200:9200"
       - "10514:10514"
       - "10514:10514/udp"
+    volumes:
+      - "./.haproxy_cfg:/etc/haproxy/"
     restart: always
 
   elasticsearch_master:
