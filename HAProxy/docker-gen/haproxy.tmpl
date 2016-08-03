@@ -1,0 +1,120 @@
+userlist STATSUSERS
+    group admin users admin
+    user admin insecure-password admin
+
+listen stats
+    bind *:9090
+    mode http
+    stats enable
+    stats refresh 60s
+    stats uri /
+    acl AuthOkay_ReadOnly http_auth(STATSUSERS)
+    acl AuthOkay_Admin http_auth_group(STATSUSERS) admin
+    stats http-request auth realm stats unless AuthOkay_ReadOnly
+
+frontend beats-5044
+    mode tcp
+    bind *:5044
+    default_backend {{ .Env.LOGSTASH_BACKEND }}-5044
+
+frontend elasticsearch-9200
+    bind *:9200
+    default_backend {{ .Env.ES_BACKEND }}-{{ .Env.ES_BACKEND_PORT }}
+
+frontend kibana-5601
+    bind *:5601
+    default_backend {{ .Env.KIBANA_BACKEND }}-{{ .Env.KIBANA_BACKEND_PORT }}
+
+frontend syslog-10514
+    mode tcp
+    bind *:10514
+    default_backend {{ .Env.LOGSTASH_BACKEND }}-10514
+
+backend {{ .Env.LOGSTASH_BACKEND }}-5044
+
+    balance {{ .Env.BALANCE }}
+    # Backend {{ .Env.LOGSTASH_BACKEND }}
+    # Backend PORT 5044
+
+    {{ range $label, $containers := groupByLabel $ "com.docker.compose.service" }}
+    {{ if eq $label $.Env.LOGSTASH_BACKEND }}
+
+    {{ range $index, $value := $containers }}
+    {{ with $project := index $value.Labels "com.docker.compose.project" }}
+    {{ if eq $project $.Env.PROJECT }}
+    {{ $network := index $value.Networks 0 }}
+    server {{$value.Name}} {{ $network.IP }}:5044 check
+    {{ end }}
+    {{ end }}
+    {{ end }}
+
+    {{ end }}
+
+    {{ end }}
+
+backend {{ .Env.LOGSTASH_BACKEND }}-10514
+
+    balance {{ .Env.BALANCE }}
+    # Backend {{ .Env.LOGSTASH_BACKEND }}
+    # Backend PORT 10514
+
+    {{ range $label, $containers := groupByLabel $ "com.docker.compose.service" }}
+    {{ if eq $label $.Env.LOGSTASH_BACKEND }}
+
+    {{ range $index, $value := $containers }}
+    {{ with $project := index $value.Labels "com.docker.compose.project" }}
+    {{ if eq $project $.Env.PROJECT }}
+    {{ $network := index $value.Networks 0 }}
+    server {{$value.Name}} {{ $network.IP }}:10514 check
+    {{ end }}
+    {{ end }}
+    {{ end }}
+
+    {{ end }}
+
+    {{ end }}
+
+
+backend {{ .Env.ES_BACKEND }}-{{ .Env.ES_BACKEND_PORT }}
+
+    balance {{ .Env.BALANCE }}
+    # Backend {{ .Env.ES_BACKEND }}
+    # Backend PORT {{ .Env.ES_BACKEND_PORT }}
+
+    {{ range $label, $containers := groupByLabel $ "com.docker.compose.service" }}
+    {{ if eq $label $.Env.ES_BACKEND }}
+
+    {{ range $index, $value := $containers }}
+    {{ with $project := index $value.Labels "com.docker.compose.project" }}
+    {{ if eq $project $.Env.PROJECT }}
+    {{ $network := index $value.Networks 0 }}
+    server {{$value.Name}} {{ $network.IP }}:{{ $.Env.ES_BACKEND_PORT }} check
+    {{ end }}
+    {{ end }}
+    {{ end }}
+
+    {{ end }}
+
+    {{ end }}
+
+backend {{ .Env.KIBANA_BACKEND }}-{{ .Env.KIBANA_BACKEND_PORT }}
+
+    balance {{ .Env.BALANCE }}
+    # Backend {{ .Env.KIBANA_BACKEND }}
+    # Backend PORT {{ .Env.KIBANA_BACKEND_PORT }}
+
+    {{ range $label, $containers := groupByLabel $ "com.docker.compose.service" }}
+    {{ if eq $label $.Env.KIBANA_BACKEND }}
+
+    {{ range $index, $value := $containers }}
+    {{ with $project := index $value.Labels "com.docker.compose.project" }}
+    {{ if eq $project $.Env.PROJECT }}
+    {{ $network := index $value.Networks 0 }}
+    server {{$value.Name}} {{ $network.IP }}:{{ $.Env.KIBANA_BACKEND_PORT }} check
+    {{ end }}
+    {{ end }}
+    {{ end }}
+
+    {{ end }}
+
+    {{ end }}

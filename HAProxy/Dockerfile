@@ -1,7 +1,10 @@
 FROM mrlesmithjr/haproxy:latest
 
-# Copy configuration
-COPY config/haproxy.cfg /haproxy.cfg
+COPY docker-gen/ /app/
+
+RUN chmod +x /app/*.sh
+
+RUN touch /var/run/haproxy.pid
 
 # Copy Ansible playbook to do configurations
 COPY elk-haproxy.yml /
@@ -9,11 +12,11 @@ COPY elk-haproxy.yml /
 # Execute Ansible playbook
 RUN ansible-playbook -i "localhost," -c local /elk-haproxy.yml
 
-# Setup entrypoint script
-RUN rm /entrypoint.sh
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh
+ENV DOCKER_HOST unix:///tmp/docker.sock
 
 # Expose ports
 EXPOSE 5044 5601 9090 9200 10514 10514/udp
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+
+CMD ["docker-gen", "-config", "/app/docker-gen.cfg"]
