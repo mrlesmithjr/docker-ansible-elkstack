@@ -2,11 +2,8 @@ FROM mrlesmithjr/haproxy:latest
 
 MAINTAINER Larry Smith Jr. <mrlesmithjr@gmail.com>
 
+# Copy docker-gen files
 COPY docker-gen/ /app/
-
-RUN chmod +x /app/*.sh
-
-RUN touch /var/run/haproxy.pid
 
 # Copy Ansible playbook to do configurations
 COPY elk-haproxy.yml /

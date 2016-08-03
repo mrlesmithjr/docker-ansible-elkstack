@@ -8,6 +8,23 @@
     - docker_gen_ver: '0.7.3'
   roles:
   tasks:
+    - name: Ensuring /app/docker-entrypoint.sh Is Executable
+      file:
+        path: "/app/docker-entrypoint.sh"
+        mode: 0755
+
+    - name: Ensuring /var/run/haproxy.pid Exists
+      stat:
+        path: "/var/run/haproxy.pid"
+      register: "haproxy_pid"
+      changed_when: false
+
+    - name: Creating /var/run/haproxy.pid If It Does Not Exist
+      file:
+        path: "/var/run/haproxy.pid"
+        state: "touch"
+      when: not haproxy_pid.stat.exists
+
     - name: Configuring Rsyslog To Listen On UDP/10514
       lineinfile:
         dest: "/etc/rsyslog.conf"
