@@ -1,5 +1,7 @@
 FROM mrlesmithjr/logstash:latest
 
+MAINTAINER Larry Smith Jr. <mrlesmithjr@gmail.com>
+
 # Copy new configurations
 COPY config/ /etc/logstash/conf.d
 

@@ -1,5 +1,7 @@
 FROM mrlesmithjr/haproxy:latest
 
+MAINTAINER Larry Smith Jr. <mrlesmithjr@gmail.com>
+
 COPY docker-gen/ /app/
 
 RUN chmod +x /app/*.sh
