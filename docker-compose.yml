@@ -53,9 +53,10 @@ services:
   kibana:
     depends_on:
       - elasticsearch
-    image: mrlesmithjr/kibana:latest
-    links:
-      - elasticsearch
+    build: ./Kibana
+    image: elk-kibana
+    # links:
+    #   - elasticsearch
     restart: always
 
   logstash:
