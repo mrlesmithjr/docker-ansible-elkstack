@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  become: true
+  vars:
+    - kibana_elasticsearch_url: 'http://haproxy:9200'
+  roles:
+  tasks:
+    - name: Setting Default elasticsearch.url
+      replace:
+        dest: "/opt/kibana/config/kibana.yml"
+        regexp: "^elasticsearch.url: \"http://elasticsearch:9200\""
+        replace: "elasticsearch.url: \"{{ kibana_elasticsearch_url }}\""
