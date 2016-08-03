@@ -20,8 +20,18 @@ services:
       - "10514:10514"
       - "10514:10514/udp"
     volumes:
-      - "./.haproxy_cfg:/etc/haproxy/"
+    #   - "./.haproxy_cfg:/etc/haproxy/"
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
     restart: always
+    environment:
+      - "ES_BACKEND=elasticsearch"
+      - "ES_BACKEND_PORT=9200"
+      - "KIBANA_BACKEND=kibana"
+      - "KIBANA_BACKEND_PORT=5601"
+      - "LOGSTASH_BACKEND=logstash"
+      - "BALANCE=roundrobin"
+      - "SERVICE=haproxy"
+      - "PROJECT=dockeransibleelkstack"
 
   elasticsearch_master:
     build: ./Elasticsearch
@@ -53,6 +63,7 @@ services:
       - elasticsearch
     build: ./Logstash
     image: elk-logstash
-    links:
-      - elasticsearch
+    # links:
+    #   - elasticsearch
+    #   - haproxy
     restart: always
