@@ -4,7 +4,8 @@ services:
     depends_on:
       - elasticsearch
       - kibana
-      - logstash
+      - logstash_pre_processor
+      - logstash_processor
       - redis
     build: ./HAProxy
     image: elk-haproxy
@@ -12,7 +13,8 @@ services:
       - elasticsearch
       - elasticsearch_master
       - kibana
-      - logstash
+      - logstash_pre_processor
+      - logstash_processor
     ports:
       - "5044:5044"
       - "5601:5601"
@@ -22,7 +24,6 @@ services:
       - "10514:10514"
       - "10514:10514/udp"
     volumes:
-    #   - "./.haproxy_cfg:/etc/haproxy/"
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
     restart: always
     environment:
@@ -31,7 +32,7 @@ services:
       - "ES_BACKEND_PORT=9200"
       - "KIBANA_BACKEND=kibana"
       - "KIBANA_BACKEND_PORT=5601"
-      - "LOGSTASH_BACKEND=logstash"
+      - "LOGSTASH_PRE_PROCESSOR_BACKEND=logstash_pre_processor"
       - "PROJECT=dockeransibleelkstack"
       - "REDIS_BACKEND=redis"
       - "REDIS_BACKEND_PORT=6379"
@@ -59,18 +60,18 @@ services:
       - elasticsearch
     build: ./Kibana
     image: elk-kibana
-    # links:
-    #   - elasticsearch
     restart: always
 
-  logstash:
+  logstash_pre_processor:
+    build: ./Logstash_pre_processor
+    image: elk-logstash-pre-processor
+    restart: always
+
+  logstash_processor:
     depends_on:
       - elasticsearch
-    build: ./Logstash
-    image: elk-logstash
-    # links:
-    #   - elasticsearch
-    #   - haproxy
+    build: ./Logstash_processor
+    image: elk-logstash-processor
     restart: always
 
   redis:

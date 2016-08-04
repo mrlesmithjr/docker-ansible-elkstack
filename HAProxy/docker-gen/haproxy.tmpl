@@ -15,7 +15,7 @@ listen stats
 frontend beats-5044
     mode tcp
     bind *:5044
-    default_backend {{ .Env.LOGSTASH_BACKEND }}-5044
+    default_backend {{ .Env.LOGSTASH_PRE_PROCESSOR_BACKEND }}-5044
 
 frontend elasticsearch-9200
     bind *:9200
@@ -32,16 +32,16 @@ frontend redis-6379
 frontend syslog-10514
     mode tcp
     bind *:10514
-    default_backend {{ .Env.LOGSTASH_BACKEND }}-10514
+    default_backend {{ .Env.LOGSTASH_PRE_PROCESSOR_BACKEND }}-10514
 
-backend {{ .Env.LOGSTASH_BACKEND }}-5044
+backend {{ .Env.LOGSTASH_PRE_PROCESSOR_BACKEND }}-5044
 
     balance {{ .Env.BALANCE }}
-    # Backend {{ .Env.LOGSTASH_BACKEND }}
+    # Backend {{ .Env.LOGSTASH_PRE_PROCESSOR_BACKEND }}
     # Backend PORT 5044
 
     {{ range $label, $containers := groupByLabel $ "com.docker.compose.service" }}
-    {{ if eq $label $.Env.LOGSTASH_BACKEND }}
+    {{ if eq $label $.Env.LOGSTASH_PRE_PROCESSOR_BACKEND }}
 
     {{ range $index, $value := $containers }}
     {{ with $project := index $value.Labels "com.docker.compose.project" }}
@@ -56,14 +56,14 @@ backend {{ .Env.LOGSTASH_BACKEND }}-5044
 
     {{ end }}
 
-backend {{ .Env.LOGSTASH_BACKEND }}-10514
+backend {{ .Env.LOGSTASH_PRE_PROCESSOR_BACKEND }}-10514
 
     balance {{ .Env.BALANCE }}
-    # Backend {{ .Env.LOGSTASH_BACKEND }}
+    # Backend {{ .Env.LOGSTASH_PRE_PROCESSOR_BACKEND }}
     # Backend PORT 10514
 
     {{ range $label, $containers := groupByLabel $ "com.docker.compose.service" }}
-    {{ if eq $label $.Env.LOGSTASH_BACKEND }}
+    {{ if eq $label $.Env.LOGSTASH_PRE_PROCESSOR_BACKEND }}
 
     {{ range $index, $value := $containers }}
     {{ with $project := index $value.Labels "com.docker.compose.project" }}
