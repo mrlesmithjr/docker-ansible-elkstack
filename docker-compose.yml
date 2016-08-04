@@ -3,6 +3,7 @@ services:
   haproxy:
     depends_on:
       - elasticsearch
+      - elasticsearch_master
       - kibana
       - logstash_pre_processor
       - logstash_processor
@@ -21,6 +22,7 @@ services:
       - "6379:6379"
       - "9090:9090"
       - "9200:9200"
+      - "9300:9300"
       - "10514:10514"
       - "10514:10514/udp"
     volumes:
@@ -30,6 +32,8 @@ services:
       - "BALANCE=roundrobin"
       - "ES_BACKEND=elasticsearch"
       - "ES_BACKEND_PORT=9200"
+      - "ES_MASTER_BACKEND=elasticsearch_master"
+      - "ES_MASTER_BACKEND_PORT=9300"
       - "KIBANA_BACKEND=kibana"
       - "KIBANA_BACKEND_PORT=5601"
       - "LOGSTASH_PRE_PROCESSOR_BACKEND=logstash_pre_processor"
@@ -41,14 +45,14 @@ services:
   elasticsearch_master:
     build: ./Elasticsearch
     image: elk-elasticsearch
-    command: "elasticsearch -Des.node.master=true -Des.node.data=false"
+    command: "elasticsearch -Des.node.master=true -Des.node.data=false -Des.discovery.zen.ping.unicast.hosts=haproxy"
     restart: always
 
   elasticsearch:
-    depends_on:
-      - elasticsearch_master
+    # depends_on:
+    #   - elasticsearch_master
     image: elk-elasticsearch
-    command: "elasticsearch -Des.discovery.zen.ping.unicast.hosts=elasticsearch_master"
+    command: "elasticsearch -Des.node.master=false -Des.discovery.zen.ping.unicast.hosts=haproxy"
     links:
       - elasticsearch_master
     volumes:

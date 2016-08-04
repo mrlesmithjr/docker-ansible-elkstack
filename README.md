@@ -69,7 +69,7 @@ dockeransibleelkstack_logstash_1            docker-entrypoint.sh logst ...      
 Scale
 -----
 What if we want to scale the [Elasticsearch] cluster and add some additional
-nodes. We can easily do that by the following:
+** Non-Master ** data/client nodes. We can easily do that by the following:
 ```
 docker-compose scale elasticsearch=4
 ```
@@ -94,6 +94,10 @@ dockeransibleelkstack_kibana_1              docker-entrypoint.sh kibana         
 dockeransibleelkstack_logstash_1            docker-entrypoint.sh logst ...              Up                                          10514/tcp, 10514/udp, 5044/tcp, 514/tcp,  
                                                                                                                                     514/udp
 ```
+If you need Multi-Master Elasticsearch scaling ** Non-Data ** nodes.
+```
+docker-compose scale elasticsearch_master=3
+```
 
 License
 -------
@@ -111,6 +115,7 @@ Larry Smith Jr.
 
 [Ansible]: <https://www.ansible.com/>
 [Docker]: <https://www.docker.com>
+[Elasticsearch]: <https://www.elastic.co/products/elasticsearch>
 [ELK Stack]: <https://www.elastic.co/products>
 [HAProxy]: <http://www.haproxy.org/>
 [Kibana]: <https://www.elastic.co/products/kibana>
