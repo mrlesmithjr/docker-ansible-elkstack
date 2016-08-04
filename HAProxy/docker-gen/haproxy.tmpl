@@ -25,6 +25,10 @@ frontend kibana-5601
     bind *:5601
     default_backend {{ .Env.KIBANA_BACKEND }}-{{ .Env.KIBANA_BACKEND_PORT }}
 
+frontend redis-6379
+    bind *:6379
+    default_backend {{ .Env.REDIS_BACKEND }}-{{ .Env.REDIS_BACKEND_PORT }}
+
 frontend syslog-10514
     mode tcp
     bind *:10514
@@ -111,6 +115,28 @@ backend {{ .Env.KIBANA_BACKEND }}-{{ .Env.KIBANA_BACKEND_PORT }}
     {{ if eq $project $.Env.PROJECT }}
     {{ $network := index $value.Networks 0 }}
     server {{$value.Name}} {{ $network.IP }}:{{ $.Env.KIBANA_BACKEND_PORT }} check
+    {{ end }}
+    {{ end }}
+    {{ end }}
+
+    {{ end }}
+
+    {{ end }}
+
+backend {{ .Env.REDIS_BACKEND }}-{{ .Env.REDIS_BACKEND_PORT }}
+
+    balance {{ .Env.BALANCE }}
+    # Backend {{ .Env.REDIS_BACKEND }}
+    # Backend PORT {{ .Env.REDIS_BACKEND_PORT }}
+
+    {{ range $label, $containers := groupByLabel $ "com.docker.compose.service" }}
+    {{ if eq $label $.Env.REDIS_BACKEND }}
+
+    {{ range $index, $value := $containers }}
+    {{ with $project := index $value.Labels "com.docker.compose.project" }}
+    {{ if eq $project $.Env.PROJECT }}
+    {{ $network := index $value.Networks 0 }}
+    server {{$value.Name}} {{ $network.IP }}:{{ $.Env.REDIS_BACKEND_PORT }} check
     {{ end }}
     {{ end }}
     {{ end }}

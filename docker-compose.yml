@@ -5,6 +5,7 @@ services:
       - elasticsearch
       - kibana
       - logstash
+      - redis
     build: ./HAProxy
     image: elk-haproxy
     links:
@@ -15,6 +16,7 @@ services:
     ports:
       - "5044:5044"
       - "5601:5601"
+      - "6379:6379"
       - "9090:9090"
       - "9200:9200"
       - "10514:10514"
@@ -24,14 +26,16 @@ services:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
     restart: always
     environment:
+      - "BALANCE=roundrobin"
       - "ES_BACKEND=elasticsearch"
       - "ES_BACKEND_PORT=9200"
       - "KIBANA_BACKEND=kibana"
       - "KIBANA_BACKEND_PORT=5601"
       - "LOGSTASH_BACKEND=logstash"
-      - "BALANCE=roundrobin"
-      - "SERVICE=haproxy"
       - "PROJECT=dockeransibleelkstack"
+      - "REDIS_BACKEND=redis"
+      - "REDIS_BACKEND_PORT=6379"
+      - "SERVICE=haproxy"
 
   elasticsearch_master:
     build: ./Elasticsearch
@@ -68,3 +72,9 @@ services:
     #   - elasticsearch
     #   - haproxy
     restart: always
+
+  redis:
+    image: mrlesmithjr/redis:latest
+    restart: always
+    volumes:
+      - "./.data:/data"
