@@ -1,20 +1,12 @@
 Repo Info
 =========
-This repo will be used as a collection of [Docker] [ELK Stack] related things.
+This repo will be used as a collection of [Docker] and [ELK Stack] related things.
 This will be an ongoing effort in regards to the info included.
 
 Usage
 -----
-In order to use the included `docker-compose.yml` you will need to follow the
-included info within the following folders first.
-
-`Elasticsearch/README.md`
-
-`HAProxy/README.md`
-
-`Logstash/README.md`
-
-Or.... I have made it simpler for consuming this and building the [Docker] images.
+In order to consume the [Docker] images to spin up the [ELK Stack] containers
+run the following to build/pull the required images:
 ```
 docker-compose build
 ```
@@ -24,10 +16,29 @@ can do the following:
 docker images
 ```
 ```
-elk-haproxy                  latest              c84e6e36f33b        5 seconds ago       330 MB
-elk-logstash                 latest              841af9fbd26a        15 seconds ago      561.9 MB
-elk-elasticsearch            latest              45bd7c40fe9a        3 hours ago         492.8 MB
+elk-haproxy                  latest              b8c9fa45f485        17 minutes ago      341.1 MB
+elk-logstash-processor       latest              ac23cc31f5fd        18 minutes ago      561.9 MB
+elk-logstash-pre-processor   latest              af8d6f655790        18 minutes ago      561.9 MB
+elk-kibana                   latest              9878f952b2ad        About an hour ago   457.7 MB
+elk-elasticsearch            latest              516e9a17ebb3        About an hour ago   490.5 MB
+mrlesmithjr/redis            latest              a49bbdba303f        About an hour ago   330 MB
+mrlesmithjr/elasticsearch    latest              531ba97a9a26        47 hours ago        456.1 MB
+mrlesmithjr/logstash         latest              aaa1e770fa96        2 days ago          561.9 MB
+mrlesmithjr/kibana           latest              245851383423        3 days ago          457.7 MB
+mrlesmithjr/haproxy          latest              01cc117c6068        3 days ago          330 MB
 ```
+
+Once the stack is up you can configure your devices to send syslog via UDP/10514
+and watch the events start flowing into [Kibana] either by connecting to
+http://127.0.0.1:5601 from your [Docker] host. Or by connecting to http://IPorHostname:5601
+from another client browser.
+
+Current ELK Flow:
+-----------------
+* elk-haproxy -> elk-logstash-pre-processor
+* elk-logstash-pre-processor -> redis
+* elk-logstash-processor <- redis
+* elk-logstash-processor -> elk-elasticsearch
 
 Compose
 -------
@@ -100,7 +111,9 @@ Larry Smith Jr.
 
 [Ansible]: <https://www.ansible.com/>
 [Docker]: <https://www.docker.com>
+[ELK Stack]: <https://www.elastic.co/products>
 [HAProxy]: <http://www.haproxy.org/>
+[Kibana]: <https://www.elastic.co/products/kibana>
 [@mrlesmithjr]: <https://twitter.com/mrlesmithjr>
 [everythingshouldbevirtual.com]: <http://everythingshouldbevirtual.com>
 [mrlesmithjr@gmail.com]: <mailto:mrlesmithjr@gmail.com>
