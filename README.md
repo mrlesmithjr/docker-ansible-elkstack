@@ -94,9 +94,49 @@ dockeransibleelkstack_kibana_1              docker-entrypoint.sh kibana         
 dockeransibleelkstack_logstash_1            docker-entrypoint.sh logst ...              Up                                          10514/tcp, 10514/udp, 5044/tcp, 514/tcp,  
                                                                                                                                     514/udp
 ```
-If you need Multi-Master Elasticsearch scaling ** Non-Data ** nodes.
+If you need Multi-Master [Elasticsearch] scaling ** Non-Data ** nodes.
 ```
 docker-compose scale elasticsearch_master=3
+```
+If you scale your [Elasticsearch] Masters ** You Should ** set the
+`discovery.zen.minimum_master_nodes` to `n/2+1`. For example if we scaled to `3`
+as the above then our `discovery.zen.minimum_master_nodes` should be `2`.
+
+To check the current setting, execute the following from your [Docker] host or
+replace `localhost` with `IPorHostname` from a client:
+```
+curl -X GET http://localhost:9200/_cluster/settings\?pretty\=true
+```
+```
+{
+  "persistent" : { },
+  "transient" : { }
+}
+```
+As you can from above this setting is not set. Therefore you could experience a
+split brain cluster. So to fix this using `3` as our number of masters we will
+set this setting to `2`:
+```
+curl -X PUT http://localhost:9200/_cluster/settings -d '{"transient": {"discovery.zen.minimum_master_nodes": 2}}'
+```
+```
+{"acknowledged":true,"persistent":{},"transient":{"discovery":{"zen":{"minimum_master_nodes":"2"}}}}
+```
+Now query the settings again to validate that this has been set:
+```
+curl -X GET http://localhost:9200/_cluster/settings\?pretty\=true
+```
+```
+{
+  "persistent" : { },
+  "transient" : {
+    "discovery" : {
+      "zen" : {
+        "minimum_master_nodes" : "2"
+      }
+    }
+  }
+}
 ```
 
 License
