@@ -10,12 +10,16 @@ services:
       - redis
     build: ./HAProxy
     image: elk-haproxy
-    links:
-      - elasticsearch
-      - elasticsearch_master
-      - kibana
-      - logstash_pre_processor
-      - logstash_processor
+    # links:
+    #   - elasticsearch
+    #   - elasticsearch_master
+    #   - kibana
+    #   - logstash_pre_processor
+    #   - logstash_processor
+    #   - redis
+    networks:
+      - front
+      - back
     ports:
       - "5044:5044"
       - "5601:5601"
@@ -47,17 +51,21 @@ services:
     image: elk-elasticsearch
     command: "elasticsearch -Des.node.master=true -Des.node.data=false -Des.discovery.zen.ping.unicast.hosts=haproxy"
     restart: always
+    networks:
+      - back
 
   elasticsearch:
     # depends_on:
     #   - elasticsearch_master
     image: elk-elasticsearch
     command: "elasticsearch -Des.node.master=false -Des.discovery.zen.ping.unicast.hosts=haproxy"
-    links:
-      - elasticsearch_master
+    # links:
+    #   - elasticsearch_master
     volumes:
       - "./.data:/usr/share/elasticsearch/data"
     restart: always
+    networks:
+      - back
 
   kibana:
     depends_on:
@@ -65,11 +73,15 @@ services:
     build: ./Kibana
     image: elk-kibana
     restart: always
+    networks:
+      - back
 
   logstash_pre_processor:
     build: ./Logstash_pre_processor
     image: elk-logstash-pre-processor
     restart: always
+    networks:
+      - back
 
   logstash_processor:
     depends_on:
@@ -77,9 +89,24 @@ services:
     build: ./Logstash_processor
     image: elk-logstash-processor
     restart: always
+    networks:
+      - back
 
   redis:
     image: mrlesmithjr/redis:latest
     restart: always
     volumes:
       - "./.data:/data"
+    networks:
+      - back
+
+networks:
+  front:
+    driver: overlay
+  back:
+    driver: overlay
+
+# networks:
+#   default:
+#     external:
+#       name: my-net
