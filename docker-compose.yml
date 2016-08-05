@@ -3,11 +3,11 @@ services:
   haproxy:
     depends_on:
       - elasticsearch
+      - redis
       - elasticsearch_master
       - kibana
       - logstash_pre_processor
       - logstash_processor
-      - redis
     build: ./HAProxy
     image: elk-haproxy
     # links:
