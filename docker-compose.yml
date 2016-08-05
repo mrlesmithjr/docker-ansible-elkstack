@@ -49,12 +49,12 @@ services:
     restart: always
 
   elasticsearch:
-    # depends_on:
-    #   - elasticsearch_master
+    depends_on:
+      - elasticsearch_master
     image: elk-elasticsearch
     command: "elasticsearch -Des.node.master=false -Des.discovery.zen.ping.unicast.hosts=haproxy"
-    links:
-      - elasticsearch_master
+    # links:
+    #   - elasticsearch_master
     volumes:
       - "./.data:/usr/share/elasticsearch/data"
     restart: always
@@ -67,12 +67,15 @@ services:
     restart: always
 
   logstash_pre_processor:
+    depends_on:
+      - redis
     build: ./Logstash_pre_processor
     image: elk-logstash-pre-processor
     restart: always
 
   logstash_processor:
     depends_on:
+      - redis
       - elasticsearch
     build: ./Logstash_processor
     image: elk-logstash-processor
