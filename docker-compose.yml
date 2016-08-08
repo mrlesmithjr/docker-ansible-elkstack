@@ -82,7 +82,8 @@ services:
     restart: always
 
   redis:
-    image: mrlesmithjr/redis:latest
+    build: ./Redis
+    image: elk-redis
     restart: always
     volumes:
       - "/data"
