@@ -56,7 +56,7 @@ services:
     # links:
     #   - elasticsearch_master
     volumes:
-      - "./.data:/usr/share/elasticsearch/data"
+      - "/usr/share/elasticsearch/data"
     restart: always
 
   kibana:
@@ -85,4 +85,5 @@ services:
     image: mrlesmithjr/redis:latest
     restart: always
     volumes:
-      - "./.data:/data"
+      - "/data"
+      - "/var/lib/redis"
