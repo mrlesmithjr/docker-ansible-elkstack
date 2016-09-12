@@ -49,7 +49,7 @@ services:
     image: "mrlesmithjr/elasticsearch-curator"
     environment:
       ELASTICSEARCH_HOST: "elasticsearch"
-      OLDER_THAN_IN_DAYS: "45"
+      DELETE_OLDER_THAN_IN_DAYS: "45"
     restart: "always"
 
   elasticsearch_master:
