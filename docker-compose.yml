@@ -42,6 +42,16 @@ services:
       - "REDIS_BACKEND_PORT=6379"
       - "SERVICE=haproxy"
 
+  elasticsearch_curator:
+    depends_on:
+      - "elasticsearch"
+      - "elasticsearch_master"
+    image: "mrlesmithjr/elasticsearch-curator"
+    environment:
+      ELASTICSEARCH_HOST: "elasticsearch"
+      OLDER_THAN_IN_DAYS: "45"
+    restart: "always"
+
   elasticsearch_master:
     build: ./Elasticsearch
     image: elk-elasticsearch
