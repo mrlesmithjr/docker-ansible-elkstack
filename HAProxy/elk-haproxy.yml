@@ -25,6 +25,12 @@
         state: "touch"
       when: not haproxy_pid.stat.exists
 
+    - name: Installing Rsyslog
+      apt:
+        name: "rsyslog"
+        state: "present"
+        update_cache: yes
+
     - name: Configuring Rsyslog To Listen On UDP/10514
       lineinfile:
         dest: "/etc/rsyslog.conf"
