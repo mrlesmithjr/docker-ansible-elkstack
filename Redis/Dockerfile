@@ -1,4 +1,4 @@
-FROM mrlesmithjr/redis:latest
+FROM mrlesmithjr/redis:alpine
 
 MAINTAINER Larry Smith Jr. <mrlesmithjr@gmail.com>
 
