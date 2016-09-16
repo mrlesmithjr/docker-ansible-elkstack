@@ -1,4 +1,4 @@
-FROM mrlesmithjr/haproxy:latest
+FROM mrlesmithjr/haproxy:alpine
 
 MAINTAINER Larry Smith Jr. <mrlesmithjr@gmail.com>
 
