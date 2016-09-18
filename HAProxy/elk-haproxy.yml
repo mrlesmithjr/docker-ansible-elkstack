@@ -25,6 +25,22 @@
         state: "touch"
       when: not haproxy_pid.stat.exists
 
+    - name: Updating APK Cache
+      apk:
+        update_cache: yes
+      when: ansible_os_family == "Alpine"
+
+    - name: Installing CA-Certs
+      apk:
+        name: "ca-certificates"
+      when: ansible_os_family == "Alpine"
+
+    - name: Installing Tar
+      apk:
+        name: "tar"
+        state: "present"
+      when: ansible_os_family == "Alpine"
+
     - name: Installing Rsyslog
       apt:
         name: "rsyslog"
@@ -47,7 +63,7 @@
         - '$UDPServerRun 10514'
         # - '$ModLoad imtcp'
         # - '$InputTCPServerRun 514'
-      when: ansible_os_family == "Debian"
+      # when: ansible_os_family == "Debian"
 
     - name: Configuring Rsyslog Redirect For UDP/10514
       lineinfile:
@@ -55,20 +71,10 @@
         line: "*.* @@127.0.0.1:10514"
       when: ansible_os_family == "Debian"
 
-    - name: Updating APK Cache
-      apk:
-        update_cache: yes
-      when: ansible_os_family == "Alpine"
-
-    - name: Installing CA-Certs
-      apk:
-        name: "ca-certificates"
-      when: ansible_os_family == "Alpine"
-
-    - name: Installing Tar
-      apk:
-        name: "tar"
-        state: "present"
+    - name: Configuring Rsyslog Redirect For UDP/10514
+      lineinfile:
+        dest: "/etc/rsyslog.conf"
+        line: "*.* @@127.0.0.1:10514"
       when: ansible_os_family == "Alpine"
 
     - name: Downloading docker-gen {{ docker_gen_ver }} Archive

@@ -1,4 +1,4 @@
-FROM mrlesmithjr/haproxy:1.6-ubuntu-16.04
+FROM mrlesmithjr/haproxy
 
 MAINTAINER Larry Smith Jr. <mrlesmithjr@gmail.com>
 
