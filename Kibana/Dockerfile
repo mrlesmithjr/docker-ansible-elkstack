@@ -1,4 +1,4 @@
-FROM mrlesmithjr/kibana:ubuntu-16.04-4.6.1
+FROM mrlesmithjr/kibana
 
 MAINTAINER Larry Smith Jr. <mrlesmithjr@gmail.com>
 
