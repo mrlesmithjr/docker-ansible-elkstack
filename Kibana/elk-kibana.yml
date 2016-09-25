@@ -2,7 +2,6 @@
 - hosts: localhost
   become: true
   vars:
-    - kibana_elasticsearch_url: 'http://haproxy:9200'
   roles:
   tasks:
     - name: Setting Default elasticsearch.url

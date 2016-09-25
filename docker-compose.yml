@@ -1,103 +1,62 @@
-version: '2'
-services:
-  haproxy:
-    depends_on:
-      - elasticsearch
-      - elasticsearch_master
-      - kibana
-      - logstash_pre_processor
-      - logstash_processor
-      - redis
-    build: ./HAProxy
-    image: elk-haproxy
-    links:
-      - elasticsearch
-      - elasticsearch_master
-      - kibana
-      - logstash_pre_processor
-      - logstash_processor
-    ports:
-      - "5044:5044"
-      - "5601:5601"
-      - "6379:6379"
-      - "9090:9090"
-      - "9200:9200"
-      - "9300:9300"
-      - "10514:10514"
-      - "10514:10514/udp"
-    volumes:
-      - "/var/run/docker.sock:/tmp/docker.sock:ro"
-    restart: always
-    environment:
-      - "BALANCE=roundrobin"
-      - "ES_BACKEND=elasticsearch"
-      - "ES_BACKEND_PORT=9200"
-      - "ES_MASTER_BACKEND=elasticsearch_master"
-      - "ES_MASTER_BACKEND_PORT=9300"
-      - "KIBANA_BACKEND=kibana"
-      - "KIBANA_BACKEND_PORT=5601"
-      - "LOGSTASH_PRE_PROCESSOR_BACKEND=logstash_pre_processor"
-      - "PROJECT=dockeransibleelkstack"
-      - "REDIS_BACKEND=redis"
-      - "REDIS_BACKEND_PORT=6379"
-      - "SERVICE=haproxy"
-
-  elasticsearch_curator:
-    depends_on:
-      - "elasticsearch"
-      - "elasticsearch_master"
-    image: "mrlesmithjr/elasticsearch-curator"
-    environment:
-      ELASTICSEARCH_HOST: "elasticsearch"
-      DELETE_OLDER_THAN_IN_DAYS: "45"
-    restart: "always"
-
-  elasticsearch_master:
-    build: ./Elasticsearch
-    image: elk-elasticsearch
-    command: "elasticsearch -Des.node.master=true -Des.node.data=false -Des.discovery.zen.ping.unicast.hosts=haproxy"
-    restart: always
-
-  elasticsearch:
-    depends_on:
-      - elasticsearch_master
-    image: elk-elasticsearch
-    command: "elasticsearch -Des.node.master=false -Des.discovery.zen.ping.unicast.hosts=haproxy"
-    # links:
-    #   - elasticsearch_master
-    volumes:
-      - "elasticsearch:/usr/share/elasticsearch/data"
-    restart: always
-
-  kibana:
-    depends_on:
-      - elasticsearch
-    build: ./Kibana
-    image: elk-kibana
-    restart: always
-
-  logstash_pre_processor:
-    depends_on:
-      - redis
-    build: ./Logstash_pre_processor
-    image: elk-logstash-pre-processor
-    restart: always
-
-  logstash_processor:
-    depends_on:
-      - redis
-      - elasticsearch
-    build: ./Logstash_processor
-    image: elk-logstash-processor
-    restart: always
-
-  redis:
-    build: ./Redis
-    image: elk-redis
-    restart: always
-    volumes:
-      - "/data"
-      - "/var/lib/redis"
-
-volumes:
-  elasticsearch:
+redis:
+  image: elk-redis
+  volumes:
+  - /data
+  - /var/lib/redis
+elasticsearch-master:
+  command:
+  - elasticsearch
+  - -Des.node.master=true
+  - -Des.node.data=false
+  - -Des.discovery.zen.ping.unicast.hosts=haproxy
+  image: elk-elasticsearch
+logstash-pre-processor:
+  image: elk-logstash-pre-processor
+haproxy:
+  ports:
+  - 10514:10514/tcp
+  - 5044:5044/tcp
+  - 5601:5601/tcp
+  - 6379:6379/tcp
+  - 9200:9200/tcp
+  - 9300:9300/tcp
+  labels:
+    io.rancher.loadbalancer.target.logstash-pre-processor: 5044=5044
+    io.rancher.loadbalancer.target.elasticsearch-master: 9300=9300
+    io.rancher.loadbalancer.target.logstash-processor: 10514=10514
+    io.rancher.loadbalancer.target.kibana: 5601=5601
+    io.rancher.loadbalancer.target.elasticsearch: 9200=9200
+    io.rancher.loadbalancer.target.redis: 6379=6379
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+  - logstash-pre-processor:logstash-pre-processor
+  - logstash-processor:logstash-processor
+  - elasticsearch-master:elasticsearch-master
+  - redis:redis
+  - elasticsearch:elasticsearch
+  stdin_open: true
+elasticsearch-curator:
+  environment:
+    DELETE_OLDER_THAN_IN_DAYS: '45'
+    ELASTICSEARCH_HOST: elasticsearch
+  image: mrlesmithjr/elasticsearch-curator
+logstash-processor:
+  image: elk-logstash-processor
+kibana:
+  environment:
+    KIBANA_ELASTICSEARCH_URL: http://elk:9200
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: elk-kibana
+  stdin_open: true
+elasticsearch:
+  command:
+  - elasticsearch
+  - -Des.node.master=false
+  - -Des.discovery.zen.ping.unicast.hosts=haproxy
+  image: elk-elasticsearch
+  volumes:
+  - elasticsearch:/usr/share/elasticsearch/data
+  volume_driver: convoy-nfs
