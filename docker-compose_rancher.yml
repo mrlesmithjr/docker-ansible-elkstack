@@ -45,9 +45,9 @@ logstash-processor:
   image: elk-logstash-processor
 kibana:
   environment:
-    ELASTICSEARCH_URL: http://elk:9200
+    ELASTICSEARCH_URL: http://haproxy:9200
   tty: true
-  image: elk-kibana
+  image: mrlesmithjr/kibana
   stdin_open: true
 elasticsearch:
   command:

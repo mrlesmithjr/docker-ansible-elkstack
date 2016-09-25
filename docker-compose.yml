@@ -55,8 +55,7 @@ services:
     labels:
       io.rancher.container.pull_image: always
     tty: true
-    build: ./Kibana
-    image: elk-kibana
+    image: "mrlesmithjr/kibana"
     stdin_open: true
   elasticsearch:
     command:
