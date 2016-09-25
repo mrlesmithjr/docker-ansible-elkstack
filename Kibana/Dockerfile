@@ -1,4 +1,4 @@
-FROM mrlesmithjr/kibana:latest
+FROM mrlesmithjr/kibana
 
 MAINTAINER Larry Smith Jr. <mrlesmithjr@gmail.com>
 
