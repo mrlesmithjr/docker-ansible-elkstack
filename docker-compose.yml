@@ -67,3 +67,6 @@ services:
     volumes:
     - elasticsearch:/usr/share/elasticsearch/data
     volume_driver: convoy-nfs
+
+volumes:
+  elasticsearch:
