@@ -3,7 +3,7 @@ FROM mrlesmithjr/kibana
 MAINTAINER Larry Smith Jr. <mrlesmithjr@gmail.com>
 
 # Define ES Host
-ENV ELASTICSEARCH_URL="http://elasticsearch:9200"
+ENV ELASTICSEARCH_URL="http://elk:9200"
 
 # Copy Ansible playbook to do configuration
 COPY elk-kibana.yml /

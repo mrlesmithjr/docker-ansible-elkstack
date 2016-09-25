@@ -46,8 +46,6 @@ logstash-processor:
 kibana:
   environment:
     ELASTICSEARCH_URL: http://elk:9200
-  labels:
-    io.rancher.container.pull_image: always
   tty: true
   image: elk-kibana
   stdin_open: true

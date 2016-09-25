@@ -1,0 +1,26 @@
+redis:
+  scale: 1
+elasticsearch-master:
+  scale: 1
+logstash-pre-processor:
+  scale: 1
+haproxy:
+  scale: 1
+  load_balancer_config:
+    lb_cookie_stickiness_policy:
+      cookie: sticky
+    haproxy_config: {}
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000
+elasticsearch-curator:
+  scale: 1
+logstash-processor:
+  scale: 1
+kibana:
+  scale: 1
+elasticsearch:
+  scale: 1
