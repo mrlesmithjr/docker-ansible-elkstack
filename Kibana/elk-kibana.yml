@@ -8,4 +8,4 @@
       replace:
         dest: "/opt/kibana/config/kibana.yml"
         regexp: "^elasticsearch.url: \"http://elasticsearch:9200\""
-        replace: "elasticsearch.url: \"{{ kibana_elasticsearch_url }}\""
+        replace: "elasticsearch.url: \"{{ elasticsearch_url }}\""
