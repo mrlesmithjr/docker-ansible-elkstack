@@ -1,0 +1,62 @@
+redis:
+  image: elk-redis
+  volumes:
+  - /data
+  - /var/lib/redis
+elasticsearch-master:
+  command:
+  - elasticsearch
+  - -Des.node.master=true
+  - -Des.node.data=false
+  - -Des.discovery.zen.ping.unicast.hosts=haproxy
+  image: elk-elasticsearch
+logstash-pre-processor:
+  image: elk-logstash-pre-processor
+haproxy:
+  ports:
+  - 10514:10514/tcp
+  - 5044:5044/tcp
+  - 5601:5601/tcp
+  - 6379:6379/tcp
+  - 9200:9200/tcp
+  - 9300:9300/tcp
+  labels:
+    io.rancher.loadbalancer.target.logstash-pre-processor: 5044=5044
+    io.rancher.loadbalancer.target.elasticsearch-master: 9300=9300
+    io.rancher.loadbalancer.target.logstash-processor: 10514=10514
+    io.rancher.loadbalancer.target.kibana: 5601=5601
+    io.rancher.loadbalancer.target.elasticsearch: 9200=9200
+    io.rancher.loadbalancer.target.redis: 6379=6379
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+  - logstash-pre-processor:logstash-pre-processor
+  - logstash-processor:logstash-processor
+  - elasticsearch-master:elasticsearch-master
+  - redis:redis
+  - elasticsearch:elasticsearch
+  stdin_open: true
+elasticsearch-curator:
+  environment:
+    DELETE_OLDER_THAN_IN_DAYS: '45'
+    ELASTICSEARCH_HOST: elasticsearch
+  image: mrlesmithjr/elasticsearch-curator
+logstash-processor:
+  image: elk-logstash-processor
+kibana:
+  environment:
+    KIBANA_ELASTICSEARCH_URL: http://elk:9200
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: elk-kibana
+  stdin_open: true
+elasticsearch:
+  command:
+  - elasticsearch
+  - -Des.node.master=false
+  - -Des.discovery.zen.ping.unicast.hosts=haproxy
+  image: elk-elasticsearch
+  volumes:
+  - elasticsearch:/usr/share/elasticsearch/data
+  volume_driver: convoy-nfs
