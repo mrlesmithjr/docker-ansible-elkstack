@@ -1,4 +1,5 @@
 redis:
+  build: ./Redis
   image: elk-redis
   volumes:
   - /data
@@ -9,8 +10,10 @@ elasticsearch-master:
   - -Des.node.master=true
   - -Des.node.data=false
   - -Des.discovery.zen.ping.unicast.hosts=haproxy
+  build: ./Elasticsearch
   image: elk-elasticsearch
 logstash-pre-processor:
+  build: ./Logstash_pre_processor
   image: elk-logstash-pre-processor
 haproxy:
   ports:
@@ -42,6 +45,7 @@ elasticsearch-curator:
     ELASTICSEARCH_HOST: elasticsearch
   image: mrlesmithjr/elasticsearch-curator
 logstash-processor:
+  build: ./Logstash_processor
   image: elk-logstash-processor
 kibana:
   environment:
@@ -49,6 +53,7 @@ kibana:
   labels:
     io.rancher.container.pull_image: always
   tty: true
+  build: ./Kibana
   image: elk-kibana
   stdin_open: true
 elasticsearch:
