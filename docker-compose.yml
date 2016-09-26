@@ -51,7 +51,7 @@ services:
     image: elk-logstash-processor
   kibana:
     environment:
-      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_URL: http://haproxy:9200
     labels:
       io.rancher.container.pull_image: always
     tty: true

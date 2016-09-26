@@ -1,8 +1,3 @@
-redis:
-  image: elk-redis
-  volumes:
-  - /data
-  - /var/lib/redis
 elasticsearch-master:
   command:
   - elasticsearch
@@ -12,6 +7,11 @@ elasticsearch-master:
   image: elk-elasticsearch
 logstash-pre-processor:
   image: elk-logstash-pre-processor
+redis:
+  image: elk-redis
+  volumes:
+  - /data
+  - /var/lib/redis
 haproxy:
   ports:
   - 10514:10514/tcp
@@ -30,11 +30,12 @@ haproxy:
   tty: true
   image: rancher/load-balancer-service
   links:
-  - logstash-pre-processor:logstash-pre-processor
-  - logstash-processor:logstash-processor
-  - elasticsearch-master:elasticsearch-master
   - redis:redis
+  - elasticsearch-master:elasticsearch-master
+  - logstash-processor:logstash-processor
   - elasticsearch:elasticsearch
+  - logstash-pre-processor:logstash-pre-processor
+  - kibana:kibana
   stdin_open: true
 elasticsearch-curator:
   environment:
