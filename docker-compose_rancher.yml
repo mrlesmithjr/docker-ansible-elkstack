@@ -8,10 +8,9 @@ elasticsearch-master:
 logstash-pre-processor:
   image: elk-logstash-pre-processor
 redis:
-  image: elk-redis
+  image: mrlesmithjr/redis
   volumes:
   - /data
-  - /var/lib/redis
 haproxy:
   ports:
   - 10514:10514/tcp

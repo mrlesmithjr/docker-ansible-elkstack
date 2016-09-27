@@ -1,11 +1,9 @@
 version: '2'
 services:
   redis:
-    build: ./Redis
-    image: elk-redis
+    image: "mrlesmithjr/redis"
     volumes:
     - /data
-    - /var/lib/redis
   elasticsearch-master:
     command:
     - elasticsearch
