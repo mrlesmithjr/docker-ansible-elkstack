@@ -1,10 +1,24 @@
+elasticsearch-master:
+  scale: 3
 redis:
   scale: 1
-elasticsearch-master:
+  load_balancer_config:
+    haproxy_config: {}
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000
+kibana-web:
   scale: 1
-logstash-pre-processor:
+elasticsearch-curator:
   scale: 1
-haproxy:
+logstash-processor:
+  scale: 2
+elasticsearch-data:
+  scale: 3
+kibana:
   scale: 1
   load_balancer_config:
     lb_cookie_stickiness_policy:
@@ -16,11 +30,33 @@ haproxy:
     unhealthy_threshold: 3
     healthy_threshold: 2
     response_timeout: 2000
-elasticsearch-curator:
+syslog:
   scale: 1
-logstash-processor:
+redis-broker:
   scale: 1
-kibana:
+logstash-pre-processor:
+  scale: 2
+logstash:
   scale: 1
+  load_balancer_config:
+    haproxy_config: {}
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000
+syslog-collector:
+  scale: 3
 elasticsearch:
   scale: 1
+  load_balancer_config:
+    haproxy_config: {}
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000
+elasticsearch-client:
+  scale: 3

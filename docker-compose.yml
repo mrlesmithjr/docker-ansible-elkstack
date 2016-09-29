@@ -1,69 +1,134 @@
-version: '2'
-services:
-  redis:
-    image: "mrlesmithjr/redis"
-    volumes:
-    - /data
-  elasticsearch-master:
-    command:
-    - elasticsearch
-    - -Des.node.master=true
-    - -Des.node.data=false
-    - -Des.discovery.zen.ping.unicast.hosts=haproxy
-    build: ./Elasticsearch
-    image: elk-elasticsearch
-  logstash-pre-processor:
-    build: ./Logstash_pre_processor
-    image: elk-logstash-pre-processor
-  haproxy:
-    ports:
-    - 10514:10514/tcp
-    - 5044:5044/tcp
-    - 5601:5601/tcp
-    - 6379:6379/tcp
-    - 9200:9200/tcp
-    - 9300:9300/tcp
-    labels:
-      io.rancher.loadbalancer.target.logstash-pre-processor: 5044=5044
-      io.rancher.loadbalancer.target.elasticsearch-master: 9300=9300
-      io.rancher.loadbalancer.target.logstash-processor: 10514=10514
-      io.rancher.loadbalancer.target.kibana: 5601=5601
-      io.rancher.loadbalancer.target.elasticsearch: 9200=9200
-      io.rancher.loadbalancer.target.redis: 6379=6379
-    tty: true
-    image: rancher/load-balancer-service
-    links:
-    - logstash-pre-processor:logstash-pre-processor
-    - logstash-processor:logstash-processor
-    - elasticsearch-master:elasticsearch-master
-    - redis:redis
-    - elasticsearch:elasticsearch
-    stdin_open: true
-  elasticsearch-curator:
-    environment:
-      DELETE_OLDER_THAN_IN_DAYS: '45'
-      ELASTICSEARCH_HOST: elasticsearch
-    image: mrlesmithjr/elasticsearch-curator
-  logstash-processor:
-    build: ./Logstash_processor
-    image: elk-logstash-processor
-  kibana:
-    environment:
-      ELASTICSEARCH_URL: http://haproxy:9200
-    labels:
-      io.rancher.container.pull_image: always
-    tty: true
-    image: "mrlesmithjr/kibana"
-    stdin_open: true
-  elasticsearch:
-    command:
-    - elasticsearch
-    - -Des.node.master=false
-    - -Des.discovery.zen.ping.unicast.hosts=haproxy
-    image: elk-elasticsearch
-    volumes:
-    - elasticsearch:/usr/share/elasticsearch/data
-    volume_driver: convoy-nfs
-
-volumes:
-  elasticsearch:
+elasticsearch-master:
+  labels:
+    io.rancher.container.pull_image: always
+  command:
+  - elasticsearch
+  - -Des.node.master=true
+  - -Des.node.data=false
+  - -Des.discovery.zen.ping.unicast.hosts=elasticsearch
+  image: mrlesmithjr/elasticsearch:alpine-2.4.0-plugins
+redis:
+  ports:
+  - 6379:6379/tcp
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+  - redis-broker:redis-broker
+  stdin_open: true
+kibana-web:
+  environment:
+    ELASTICSEARCH_URL: http://elasticsearch:9200
+  tty: true
+  image: mrlesmithjr/kibana
+  links:
+  - 'elasticsearch:'
+  stdin_open: true
+elasticsearch-curator:
+  environment:
+    DELETE_OLDER_THAN_IN_DAYS: '45'
+    ELASTICSEARCH_HOST: elasticsearch
+  image: mrlesmithjr/elasticsearch-curator
+  links:
+  - 'elasticsearch:'
+logstash-processor:
+  image: elk-logstash-processor
+  links:
+  - 'elasticsearch:'
+  - 'redis:'
+elasticsearch-data:
+  labels:
+    io.rancher.container.pull_image: always
+  command:
+  - elasticsearch
+  - -Des.node.master=false
+  - -Des.node.data=true
+  - -Des.discovery.zen.ping.unicast.hosts=elasticsearch
+  image: mrlesmithjr/elasticsearch:alpine-2.4.0-plugins
+  links:
+  - 'elasticsearch:'
+  volumes:
+  - elasticsearch:/usr/share/elasticsearch/data
+  volume_driver: convoy-nfs
+kibana:
+  ports:
+  - 5601:5601
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+  - kibana-web:kibana-web
+  stdin_open: true
+syslog:
+  ports:
+  - 514:514/udp
+  environment:
+    BACKEND_SERVICE_PORT: '514'
+    FRONTEND_SERVICE_PORT: '514'
+    RANCHER_ACCESS_KEY: FDE76F55B411624BACB2
+    RANCHER_HOST: docker00.etsbv.internal
+    RANCHER_HOST_PORT: '8080'
+    RANCHER_PROJECT_ID: 1a5
+    RANCHER_SECRET_KEY: Yerrhb4sbmXyhzT4ihn5teBTkoKcnxbGzKvEptva
+    RANCHER_SERVICE_NAME: syslog-collector
+    RANCHER_STACK_NAME: ELK
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: mrlesmithjr/nginx-lb:ubuntu-syslog-lb-rancher
+  links:
+  - 'syslog-collector:'
+  stdin_open: true
+redis-broker:
+  image: mrlesmithjr/redis
+  volumes:
+  - /data
+logstash-pre-processor:
+  tty: true
+  image: elk-logstash-pre-processor
+  links:
+  - 'redis:'
+  stdin_open: true
+logstash:
+  ports:
+  - 10514:10514/tcp
+  - 5044:5044/tcp
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+  - logstash-pre-processor:logstash-pre-processor
+  stdin_open: true
+syslog-collector:
+  environment:
+    ENABLE_UDP: 'true'
+    REDIRECT_SYSLOG: 'true'
+    REDIRECT_SYSLOG_HOST: logstash
+    REDIRECT_SYSLOG_HOST_PORT: '10514'
+    REDIRECT_SYSLOG_PROTOCOL: tcp
+    UDP_PORT: '514'
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: mrlesmithjr/syslog-collector
+  links:
+  - 'logstash:'
+  stdin_open: true
+elasticsearch:
+  ports:
+  - 9200:9200
+  expose:
+  - 9300:9300/tcp
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+  - elasticsearch-master:elasticsearch-master
+  stdin_open: true
+elasticsearch-client:
+  labels:
+    io.rancher.container.pull_image: always
+  command:
+  - elasticsearch
+  - -Des.node.master=false
+  - -Des.node.data=false
+  - -Des.discovery.zen.ping.unicast.hosts=elasticsearch
+  image: mrlesmithjr/elasticsearch:alpine-2.4.0-plugins
+  links:
+  - 'elasticsearch:'
